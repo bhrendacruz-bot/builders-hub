@@ -8,9 +8,9 @@ Este repositorio e o hub open-source de skills de IA da V4. Funciona como base d
 - `squads/` e `bases/` — Knowledge Bases pessoais do usuario (gitignored, ficam locais)
   - **Padrao obrigatorio:** `squads/{squad}/clientes/{cliente}/`. Toda KB de cliente vive dentro de um squad. Cliente solto, fora de squad, NAO existe — `/novo-cliente` recusa criar.
   - `squads/{squad}/` — cada squad tem `README.md` com membros, `CLAUDE.md` com contexto e `docs/` com acordos do time. Crie squad com `/novo-squad` antes do primeiro cliente.
-  - `squads/{squad}/clientes/{cliente}/` — cada cliente tem `calls/`, `docs/`, `campanhas/`, `links.md` (recursos recorrentes — NotebookLM, Drive, site, etc) e `CLAUDE.md` proprio.
+  - `squads/{squad}/clientes/{cliente}/` — cada cliente tem `calls/` (transcripts brutos), `checkins/` (pautas, ensaios e reviews), `docs/`, `campanhas/`, `mission-control/` (estado vivo), `links.md` (recursos recorrentes — NotebookLM, Drive, site, etc) e `CLAUDE.md`/`AGENTS.md` proprios.
   - `bases/{projeto}/` — KBs de qualquer outra area (docs, dados, referencias) que nao sao cliente.
-- Cada KB pode ter um CLAUDE.md proprio (gerado por `/contexto`). Leia ele primeiro quando trabalhar naquele contexto.
+- Cada KB pode ter um CLAUDE.md/AGENTS.md proprio (gerado por `/contexto`). Leia ele primeiro quando trabalhar naquele contexto.
 - `REGISTRY.md` — catalogo auto-gerado de todas as skills compartilhadas, agrupado por papel
 
 ## Skills de setup/fluxo (base)
@@ -19,7 +19,7 @@ Este repositorio e o hub open-source de skills de IA da V4. Funciona como base d
 - `/sync-hub` — Puxa as skills compartilhadas mais recentes do repo remoto.
 - `/compartilhar-skill` — Empacota uma skill local e abre PR pro hub publico.
 - `/criador-de-skills` — Cria skill nova com prefixo de papel obrigatorio.
-- `/contexto` — Le tudo numa KB e gera CLAUDE.md daquele contexto.
+- `/contexto` — Le tudo numa KB, gera CLAUDE.md/AGENTS.md e atualiza Mission Control quando for cliente.
 - `/novo-squad` — Cria pasta de squad com README de membros (rode antes do primeiro cliente).
 - `/novo-cliente` · `/novo-projeto` — Cria pasta de KB com estrutura padrao. `/novo-cliente` agora pede o squad e coleta links uteis (NotebookLM, Drive, site, outros) que ficam em `links.md`.
 - `/geral-brainstormar-sobre-minha-funcao` — Descobre onde IA agrega mais valor no dia a dia.
@@ -33,7 +33,7 @@ Toda skill compartilhada pelo time segue o padrao `{prefixo}-{nome}`. Dois tipos
 - **Papeis** (skills que entregam trabalho final, agrupadas por quem usa): `geral-*` · `gt-*` · `designer-*` · `copy-*` · `account-*` · `coord-*`
 - **Fontes** (skills que puxam dados de integracoes externas, reutilizaveis por outras): `v4mos-*` · `google-*` · `ga4-*` · `meta-*` · `hubspot-*` · `kommo-*` · `shopify-*` · `tray-*`
 
-> Dica: pra ver so as skills do seu papel, digita `/gt`, `/designer`, `/account`, `/copy`, `/coord` ou `/geral` no Claude Code — o autocomplete filtra pelo prefixo. `geral-*` sao skills que qualquer papel usa.
+- Dica: pra ver so as skills do seu papel, digita `/gt`, `/designer`, `/account`, `/copy`, `/coord` ou `/geral` no Claude Code — o autocomplete filtra pelo prefixo. `geral-*` sao skills que qualquer papel usa.
 
 Consulte [REGISTRY.md](./REGISTRY.md) pra ver tudo que o time ja compartilhou. Pra contribuir veja [CONTRIBUTING.md](./CONTRIBUTING.md).
 

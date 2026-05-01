@@ -4,10 +4,12 @@
 **Status:** Implementado
 
 > **Nota de update (2026-05-01):** durante a execucao, a pasta wrapper `clientes/` foi renomeada para `squads/` pra deixar a hierarquia explicita. Onde este spec menciona `clientes/{squad}/...`, leia como `squads/{squad}/...`. O caminho final padronizado e: `squads/{squad}/clientes/{cliente}/`. Cliente solto fora de squad nao existe.
+>
+> **Nota de update (2026-05-01, check-ins):** a estrutura padrao de cliente passou a incluir `checkins/` para materiais de conducao de check-in (pautas, ensaios, reviews e relatorios) e `mission-control/` para estado vivo da conta. `calls/` continua sendo apenas transcripts brutos.
 
 ## Contexto
 
-Hoje o builders-hub tem clientes diretos em `clientes/{cliente}/`. Cada cliente e uma KB pessoal (gitignored) com `calls/`, `docs/`, `campanhas/`, `CLAUDE.md` e `.env`. Skills relevantes: `/novo-cliente` cria a pasta a partir de `clientes/_template/`; `/contexto` gera o `CLAUDE.md` da KB.
+Antes desta mudanca, o builders-hub tinha clientes diretos em `clientes/{cliente}/`. O padrao atual e `squads/{squad}/clientes/{cliente}/`, com `calls/`, `checkins/`, `docs/`, `campanhas/`, `mission-control/`, `CLAUDE.md`, `AGENTS.md` e `.env`.
 
 Precisamos agrupar clientes por squad — um squad e um time fixo de pessoas (gestor, account, trafego, criativo, CS, etc.) que atende varios clientes. Um cliente pertence a um squad so.
 
@@ -20,21 +22,23 @@ Adicionar uma camada de squad entre `clientes/` e o cliente. Criar uma skill `/n
 ## Estrutura de pastas final
 
 ```
-clientes/
-├── _template-cliente/                  ← renomeado de _template/, vai pro repo
-├── _template-squad/                    ← novo, vai pro repo
+squads/
 └── {squad}/                            ← gitignored
     ├── CLAUDE.md                       ← contexto do squad (lido em cascata pelo Claude Code)
+    ├── AGENTS.md                       ← espelho do contexto do squad
     ├── README.md                       ← quem e quem (formato livre, leitura humana)
     ├── docs/                           ← docs gerais do squad
     └── clientes/
         └── {cliente}/                  ← estrutura padrao de cliente (igual hoje)
             ├── CLAUDE.md
+            ├── AGENTS.md
             ├── .env
             ├── .env.example
-            ├── calls/
+            ├── calls/          ← transcripts brutos
+            ├── checkins/       ← pautas, ensaios, reviews e relatorios de check-in
             ├── docs/
-            └── campanhas/
+            ├── campanhas/
+            └── mission-control/← OKRs, apostas vivas, combinados, personas e historicos
 ```
 
 Decisoes:
@@ -49,11 +53,12 @@ Decisoes:
 
 ### 1. Templates no repo
 
-**`clientes/_template-squad/`** (novo, commitado):
+**`bases/_template/_template-squad/`** (novo, commitado):
 
 ```
 _template-squad/
 ├── CLAUDE.md
+├── AGENTS.md
 ├── README.md
 ├── docs/.gitkeep
 └── clientes/.gitkeep
@@ -78,9 +83,9 @@ Conteudo do `README.md` no template:
 - (preenchido por `/novo-squad`)
 ```
 
-**`clientes/_template-cliente/`** (renomeado de `_template/`):
+**`bases/_template/_template-cliente/`**:
 
-Mesmo conteudo de hoje. So muda o nome da pasta. Tem `.env.example`, `CLAUDE.md` placeholder, e subpastas `calls/`, `docs/`, `campanhas/` (com `.gitkeep`).
+Mesmo conteudo de hoje. So muda o nome da pasta. Tem `.env.example`, `CLAUDE.md` placeholder, e subpastas `calls/`, `checkins/`, `docs/`, `campanhas/` (com `.gitkeep`). `mission-control/` pode nascer vazio via `/contexto` ou `/account-handoff`.
 
 ### 2. Skill nova: `/novo-squad`
 
@@ -89,7 +94,7 @@ Sem prefixo (skill de base, igual a `/novo-cliente` e `/novo-projeto`). Duplo-wr
 Fluxo:
 
 1. **Pergunta nome do squad.** Ex.: "Squad Performance" → pasta `squad-performance` (lowercase + hifens).
-2. **Cria a estrutura** copiando `clientes/_template-squad/` para `clientes/{nome-formatado}/`. Substitui o placeholder `{NOME}` no `CLAUDE.md` e no `README.md` pelo nome original digitado pelo usuario (com capitalizacao preservada — ex: "Squad Performance"), nao pela versao em hifens.
+2. **Cria a estrutura** copiando `bases/_template/_template-squad/` para `squads/{nome-formatado}/`. Substitui o placeholder `{NOME}` no `CLAUDE.md`, `AGENTS.md` e no `README.md` pelo nome original digitado pelo usuario (com capitalizacao preservada — ex: "Squad Performance"), nao pela versao em hifens.
 3. **Coleta membros em loop:**
    > "Adiciona um membro do squad: nome + funcao (ex: 'Joao Silva — Gestor de Trafego'). Aperta Enter sem digitar nada quando terminar."
    
@@ -102,10 +107,10 @@ Fluxo:
 
 Mudancas no fluxo:
 
-1. **Antes de pedir nome do cliente**, escaneia `clientes/*/` filtrando `_template-*`. Resultado e a lista de squads existentes.
+1. **Antes de pedir nome do cliente**, escaneia `squads/*/` filtrando `_template-*`. Resultado e a lista de squads existentes.
    - Se vazia: para com mensagem "Voce ainda nao tem squad. Roda `/novo-squad` antes."
    - Se nao vazia: mostra lista numerada e pergunta "Em qual squad esse cliente entra?". Aceita numero ou nome.
-2. **Cria a pasta** em `clientes/{squad}/clientes/{nome-formatado}/` copiando `_template-cliente/`.
+2. **Cria a pasta** em `squads/{squad}/clientes/{nome-formatado}/` copiando `bases/_template/_template-cliente/`.
 3. **Resto identico ao fluxo de hoje**: NotebookLM, geracao do `CLAUDE.md` do cliente, copia do `.env.example` pra `.env`, mensagem final.
 
 ### 4. Skill atualizada: `/contexto`
@@ -120,7 +125,7 @@ Hoje le todos os arquivos da pasta corrente e gera `CLAUDE.md`. Precisa detectar
 
 Reescrever o trecho que descreve `clientes/` e `bases/`:
 
-> - `clientes/{squad}/clientes/{cliente}/` — KBs de clientes, agrupados por squad. Crie squad com `/novo-squad` antes do primeiro cliente.
+> - `squads/{squad}/clientes/{cliente}/` — KBs de clientes, agrupados por squad. Crie squad com `/novo-squad` antes do primeiro cliente.
 > - `bases/{projeto}/` — KBs de qualquer outra coisa (estudos, projetos pessoais).
 > - Cada squad tem `README.md` com os membros e `CLAUDE.md` com contexto pro Claude.
 > - Cada cliente tem o `CLAUDE.md` proprio gerado por `/contexto`.
@@ -132,11 +137,10 @@ Atualizar tambem a lista de "Skills de setup/fluxo" pra incluir `/novo-squad`.
 Adicionar excecao pro novo template:
 
 ```
-!/clientes/_template-cliente/
-!/clientes/_template-squad/
+!/bases/_template/
 ```
 
-Remover a linha antiga `!/clientes/_template/` (ja vai estar renomeado).
+Templates versionados ficam em `bases/_template/`; dados reais ficam em `squads/` e seguem gitignored.
 
 `bases/_template/` continua intocado.
 
@@ -144,9 +148,9 @@ Remover a linha antiga `!/clientes/_template/` (ja vai estar renomeado).
 
 Como parte da execucao do plano:
 
-1. Renomear `clientes/_template/` → `clientes/_template-cliente/` com `git mv`.
-2. Rodar `/novo-squad` (manual ou simulado) pra criar `clientes/squad-exemplo/` — membros placeholder que o usuario preenche depois.
-3. Mover `clientes/lopes-campanelli-sociedade-de-advogados/` → `clientes/squad-exemplo/clientes/lopes-campanelli-sociedade-de-advogados/` com `git mv`. (Como o conteudo do cliente e gitignored, na pratica e um `mv` mesmo — git nao rastreia esses arquivos.)
+1. Mover templates versionados para `bases/_template/_template-cliente/` e `bases/_template/_template-squad/`.
+2. Rodar `/novo-squad` (manual ou simulado) pra criar `squads/squad-exemplo/` — membros placeholder que o usuario preenche depois.
+3. Mover `clientes/lopes-campanelli-sociedade-de-advogados/` → `squads/squad-exemplo/clientes/lopes-campanelli-sociedade-de-advogados/`. (Como o conteudo do cliente e gitignored, na pratica e um `mv` mesmo — git nao rastreia esses arquivos.)
 
 ## Skills nao impactadas neste spec
 
@@ -162,9 +166,9 @@ Skills que recebem o cliente como argumento ou via prompt (ex.: `account-pesquis
 ## Criterios de aceite
 
 1. `/novo-squad` cria a pasta com `CLAUDE.md`, `README.md`, `docs/`, `clientes/` e preenche os membros coletados.
-2. `/novo-cliente` recusa rodar se nao houver squad e cria o cliente em `clientes/{squad}/clientes/{cliente}/` quando houver.
+2. `/novo-cliente` recusa rodar se nao houver squad e cria o cliente em `squads/{squad}/clientes/{cliente}/` quando houver.
 3. `/contexto` funciona corretamente em pasta de squad e em pasta de cliente.
-4. `clientes/_template/` foi renomeado pra `_template-cliente/` e o `.gitignore` reflete os dois templates novos.
-5. `clientes/lopes-campanelli-sociedade-de-advogados/` foi movido pra `clientes/squad-exemplo/clientes/`.
+4. Templates versionados vivem em `bases/_template/`.
+5. `clientes/lopes-campanelli-sociedade-de-advogados/` foi movido pra `squads/squad-exemplo/clientes/`.
 6. CLAUDE.md raiz descreve a estrutura nova e cita `/novo-squad`.
 7. Skills `/novo-squad`, `/novo-cliente`, `/contexto` existem identicas em `.claude/skills/` e `.agents/skills/`.

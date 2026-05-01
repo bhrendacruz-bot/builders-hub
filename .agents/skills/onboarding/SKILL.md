@@ -289,7 +289,7 @@ Pergunte:
 > "Voce atua diretamente operando clientes na V4? (sim/nao)"
 
 Guarde:
-- **Sim (operacao):** vai usar `clientes/`, `/novo-cliente`, `/contexto`
+- **Sim (operacao):** vai usar `squads/`, `/novo-squad`, `/novo-cliente`, `/contexto`
 - **Nao (outras areas):** vai usar `bases/`, `/novo-projeto`, `/contexto`
 
 ## Passo 7 — Ensinar o repositorio
@@ -302,7 +302,7 @@ Guarde:
 **Knowledge Bases (pastas de dados)**
 
 Se operacao:
-> "A pasta `clientes/` e onde ficam os dados dos seus clientes. Cada cliente tem sua propria pasta com calls (transcricoes de reunioes), docs (documentos) e campanhas (dados de performance). Quanto mais dados voce coloca, melhor a IA trabalha. Essa pasta fica so no seu computador — nunca sobe pro repo publico."
+> "A pasta `squads/` e onde ficam os squads e os dados dos clientes. Cada cliente vive em `squads/{squad}/clientes/{cliente}/` e tem calls (transcricoes brutas), checkins (pautas, ensaios e reviews), docs, campanhas e Mission Control. Quanto mais dados voce coloca, melhor a IA trabalha. Essa pasta fica so no seu computador — nunca sobe pro repo publico."
 
 Se outras areas:
 > "A pasta `bases/` e onde ficam os dados dos seus projetos. Cada projeto tem docs, dados e referencias. Quanto mais dados voce coloca, melhor a IA trabalha. Essa pasta fica so no seu computador."
@@ -324,13 +324,13 @@ Explique cada uma com exemplo pratico:
 > "Quando voce criou uma skill que funciona bem e quer que o time inteiro use, roda `/compartilhar-skill`. Ela valida tudo, cria branch, faz commit e abre um Pull Request automatico pro curador (Guilherme) aprovar. Voce nao precisa saber git. Exemplo: criou `/gt-analise-anomalias` que funciona bem. Roda `/compartilhar-skill`, confirma os dados, e em 5 segundos tem um PR no GitHub pra review."
 
 **`/novo-cliente`** (so pra operacao)
-> "Cria pasta de cliente novo com estrutura padrao. Roda `/novo-cliente`, digita 'Empresa X', cola o link do NotebookLM e pronto."
+> "Cria pasta de cliente novo dentro de um squad com estrutura padrao: calls, checkins, docs, campanhas, links e contexto inicial. Se ainda nao existir squad, roda `/novo-squad` primeiro."
 
 **`/novo-projeto`** (so pra outras areas)
 > "Igual o `/novo-cliente`, mas pra projetos. Cria docs/, dados/, referencias/."
 
 **`/contexto`**
-> "Depois que voce jogou os dados na pasta, roda `/contexto`. A IA le TUDO e gera um CLAUDE.md com resumo completo. Dali pra frente, toda vez que voce trabalhar nessa pasta, a IA ja sabe tudo. Exemplo: jogou 3 transcricoes e 2 relatorios, roda `/contexto` e a IA gera um resumo com quem e o cliente, o que foi combinado, metricas, pendencias."
+> "Depois que voce jogou os dados na pasta, roda `/contexto`. A IA le TUDO, gera CLAUDE.md/AGENTS.md e, se for cliente, cria/atualiza o Mission Control. Dali pra frente, toda vez que voce trabalhar nessa pasta, a IA ja sabe tudo. Exemplo: jogou 3 transcricoes e 2 relatorios, roda `/contexto` e a IA gera um resumo com quem e o cliente, o que foi combinado, metricas, pendencias e estado dos check-ins."
 
 **`/criador-de-skills`**
 > "A mais poderosa. Quando algo com a IA ficou bom — uma analise, um relatorio, um check-in — transforma em skill. Ai na proxima vez voce so roda a skill. Exemplo: preparou um check-in com IA e ficou otimo. Roda `/criador-de-skills`, descreve o que fez, e ela cria `/account-checkin-ppt` que repete o processo. Essa skill FORCA prefixo de papel (geral/gt/designer/copy/account/coord) e escreve em `.claude/` E `.agents/` ao mesmo tempo."

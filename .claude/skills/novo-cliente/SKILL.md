@@ -1,6 +1,6 @@
 ---
 name: novo-cliente
-description: Cria uma nova pasta de cliente dentro de um squad com estrutura padrao, CLAUDE.md inicial e links.md. Pergunta squad, nome e links uteis (NotebookLM, Drive, site, outros). Use quando o usuario rodar /novo-cliente ou disser que quer adicionar um cliente novo.
+description: Cria uma nova pasta de cliente dentro de um squad com estrutura padrao, CLAUDE.md/AGENTS.md iniciais, links.md, calls/, checkins/, docs/ e campanhas/. Pergunta squad, nome e links uteis (NotebookLM, Drive, site, outros). Use quando o usuario rodar /novo-cliente ou disser que quer adicionar um cliente novo.
 ---
 
 Voce vai criar a pasta de um novo cliente DENTRO de um squad. **Padrao obrigatorio:** `squads/{squad}/clientes/{cliente}/`. Cliente fora de squad nao existe.
@@ -35,12 +35,12 @@ Converta para lowercase-com-hifens (ex: "Academia Estação Saúde" → "academi
 ### Passo 3 — Criar a estrutura
 
 ```bash
-cp -r squads/_template-cliente "squads/[squad]/clientes/[cliente]"
+cp -r bases/_template/_template-cliente "squads/[squad]/clientes/[cliente]"
 # Copia o .env.example pra .env (inicial vazio, o usuario preenche conforme for usando)
 cp "squads/[squad]/clientes/[cliente]/.env.example" "squads/[squad]/clientes/[cliente]/.env"
 ```
 
-O `.env` e gitignored por padrao (`squads/` inteiro e — so `_template-*/` sobe pro repo). Credenciais ficam locais.
+O `.env` e gitignored por padrao (`squads/` inteiro fica local). Credenciais ficam locais. Templates versionados ficam em `bases/_template/`.
 
 ### Passo 4 — Coletar links uteis
 
@@ -80,9 +80,9 @@ Recursos recorrentes deste cliente. Atualize sempre que aparecer link novo.
 
 Itens nao informados ficam com `—`. A secao "Outros" recebe os itens do loop (passo 4.4).
 
-### Passo 6 — Escrever `CLAUDE.md` do cliente
+### Passo 6 — Escrever `CLAUDE.md` e `AGENTS.md` do cliente
 
-Crie `squads/[squad]/clientes/[cliente]/CLAUDE.md` com:
+Crie `squads/[squad]/clientes/[cliente]/CLAUDE.md` e `squads/[squad]/clientes/[cliente]/AGENTS.md` com o mesmo conteudo:
 
 ```markdown
 # [Nome do Cliente]
@@ -104,13 +104,15 @@ Rode `/contexto` apos adicionar dados (calls, docs, campanhas) pra gerar o conte
 Mostre a estrutura criada:
 ```
 squads/[squad]/clientes/[cliente]/
-├── CLAUDE.md
-├── links.md         # links uteis (NotebookLM, Drive, site, outros)
-├── .env            # suas credenciais (gitignored)
-├── .env.example    # template das credenciais
-├── calls/
-├── docs/
-└── campanhas/
+|-- CLAUDE.md
+|-- AGENTS.md
+|-- links.md         # links uteis (NotebookLM, Drive, site, outros)
+|-- .env            # suas credenciais (gitignored)
+|-- .env.example    # template das credenciais
+|-- calls/           # transcripts brutos
+|-- checkins/        # pautas, ensaios e reviews de check-in
+|-- docs/
+`-- campanhas/
 ```
 
 Diga:

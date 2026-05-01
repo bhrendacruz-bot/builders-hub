@@ -500,7 +500,7 @@
   <div class="what-is-grid reveal">
     <div class="what-is-card">
       <h3>Knowledge Bases</h3>
-      <p>Pastas organizadas com os dados dos seus clientes ou projetos. A IA le tudo e trabalha com contexto real — nao chuta.</p>
+      <p>Pastas organizadas por squad, cliente e projeto. A IA le dados reais, Mission Control e historico de check-ins — nao chuta.</p>
     </div>
     <div class="what-is-card">
       <h3>Skills</h3>
@@ -543,7 +543,7 @@
       <span class="skill-tag tag-ops">Operacao</span>
       <div class="skill-name">Novo Cliente</div>
       <div class="skill-cmd">/novo-cliente</div>
-      <p class="skill-desc">Cria pasta de cliente com estrutura padrao. Pergunta o NotebookLM e deixa tudo pronto.</p>
+      <p class="skill-desc">Cria cliente dentro de um squad com calls, checkins, docs, campanhas, links e contexto inicial pra qualquer LLM.</p>
     </div>
     <div class="skill-card">
       <span class="skill-tag tag-ops">Outras areas</span>
@@ -555,7 +555,25 @@
       <span class="skill-tag tag-todos">Todo mundo</span>
       <div class="skill-name">Contexto</div>
       <div class="skill-cmd">/contexto</div>
-      <p class="skill-desc">Le tudo numa pasta e gera um resumo completo. A partir dai, a IA conhece seu cliente ou projeto.</p>
+      <p class="skill-desc">Le tudo numa pasta, gera contexto pra qualquer LLM e monta Mission Control quando for cliente.</p>
+    </div>
+    <div class="skill-card">
+      <span class="skill-tag tag-ops">Account</span>
+      <div class="skill-name">Handoff</div>
+      <div class="skill-cmd">/account-handoff</div>
+      <p class="skill-desc">Transforma venda + kickoff em KB inicial, Mission Control preliminar e deck HTML pra primeira reuniao.</p>
+    </div>
+    <div class="skill-card">
+      <span class="skill-tag tag-ops">Account</span>
+      <div class="skill-name">Check-in Roleplay</div>
+      <div class="skill-cmd">/account-checkin-roleplay</div>
+      <p class="skill-desc">Prepara o ROPRE, simula o cliente real e salva a pauta/ensaio em checkins/ antes da call.</p>
+    </div>
+    <div class="skill-card">
+      <span class="skill-tag tag-ops">Account</span>
+      <div class="skill-name">Check-in Review</div>
+      <div class="skill-cmd">/account-checkin-review</div>
+      <p class="skill-desc">Depois da call, le o transcript, atualiza Mission Control e salva a review em checkins/.</p>
     </div>
     <div class="skill-card">
       <span class="skill-tag tag-todos">Todo mundo</span>
@@ -571,19 +589,24 @@
   <div class="reveal">
     <div class="section-num">03</div>
     <h2 class="section-title">Estrutura de Pastas</h2>
-    <p class="section-subtitle">Opera clientes? Use clientes/. Outra area? Use bases/. O onboarding configura pra voce.</p>
+    <p class="section-subtitle">Opera clientes? Use squads/{squad}/clientes/{cliente}/. Outra area? Use bases/. O onboarding configura pra voce.</p>
   </div>
   <div class="structure-visual reveal">
     <div class="structure-box">
       <span class="tag">Operacao</span>
-      <h3>clientes/</h3>
+      <h3>squads/</h3>
       <div class="folder-tree">
-        <span class="folder">clientes/</span><br>
-        &nbsp;&nbsp;<span class="folder">empresa-x/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;calls/ <span class="comment">— reunioes</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;docs/ <span class="comment">— documentos</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;campanhas/ <span class="comment">— dados</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;CLAUDE.md <span class="comment">— contexto gerado</span>
+        <span class="folder">squads/</span><br>
+        &nbsp;&nbsp;<span class="folder">squad-x/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;README.md <span class="comment">— membros</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="folder">clientes/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="folder">empresa-x/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calls/ <span class="comment">— transcripts brutos</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;checkins/ <span class="comment">— pautas, ensaios, reviews</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mission-control/ <span class="comment">— estado vivo</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docs/ <span class="comment">— documentos</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;campanhas/ <span class="comment">— dados</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CLAUDE.md / AGENTS.md
       </div>
     </div>
     <div class="structure-box">
@@ -595,7 +618,7 @@
         &nbsp;&nbsp;&nbsp;&nbsp;docs/ <span class="comment">— relatorios, atas</span><br>
         &nbsp;&nbsp;&nbsp;&nbsp;dados/ <span class="comment">— planilhas, CSVs</span><br>
         &nbsp;&nbsp;&nbsp;&nbsp;referencias/ <span class="comment">— apoio</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;CLAUDE.md <span class="comment">— contexto gerado</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;CLAUDE.md / AGENTS.md <span class="comment">— contexto gerado</span>
       </div>
     </div>
   </div>
@@ -629,15 +652,15 @@
       <div class="step-num">3</div>
       <div class="step-content">
         <h3>Crie sua primeira base</h3>
-        <p>Monte a Knowledge Base do seu cliente ou projeto. Jogue os dados la dentro.</p>
-        <span class="step-cmd">/novo-cliente</span> <span class="step-cmd">/novo-projeto</span>
+        <p>Monte a Knowledge Base do seu cliente ou projeto. Cliente sempre fica dentro de um squad.</p>
+        <span class="step-cmd">/novo-squad</span> <span class="step-cmd">/novo-cliente</span> <span class="step-cmd">/novo-projeto</span>
       </div>
     </div>
     <div class="flow-step">
       <div class="step-num">4</div>
       <div class="step-content">
         <h3>Gere o contexto</h3>
-        <p>A IA le tudo e gera um resumo completo. A partir dai, ela conhece seu cliente.</p>
+        <p>A IA le tudo, gera CLAUDE.md/AGENTS.md e, se for cliente, cria ou atualiza o Mission Control.</p>
         <span class="step-cmd">/contexto</span>
       </div>
     </div>
@@ -645,7 +668,8 @@
       <div class="step-num">5</div>
       <div class="step-content">
         <h3>Trabalhe com a IA</h3>
-        <p>Faca seu trabalho: analises, check-ins, relatorios, estrategias. A IA conhece o contexto e ajuda de verdade.</p>
+        <p>Faca seu trabalho: analises, check-ins, relatorios, estrategias. Para check-ins, use roleplay antes e review depois.</p>
+        <span class="step-cmd">/account-checkin-roleplay</span> <span class="step-cmd">/account-checkin-review</span>
       </div>
     </div>
     <div class="flow-step">

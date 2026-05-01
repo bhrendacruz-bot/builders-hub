@@ -43,7 +43,7 @@ Valida git/GitHub CLI/dependências 100%, instala o que faltar, e te guia pelo r
 | `/sync-hub` | Atualiza suas skills com o que o time compartilhou |
 | `/compartilhar-skill` | Empacota uma skill sua e manda pro Hub (abre PR automático) |
 | `/criador-de-skills` | Cria skill nova do zero com prefixo de área |
-| `/contexto` | Lê uma KB e gera CLAUDE.md com o contexto |
+| `/contexto` | Lê uma KB, gera CLAUDE.md/AGENTS.md e atualiza Mission Control quando for cliente |
 | `/novo-cliente` · `/novo-projeto` | Cria pasta com estrutura padrão |
 | `/brainstormar-sobre-minha-funcao` | Descobre onde IA agrega mais valor no seu dia |
 | `/sabatina` | Stress-test de planos e ideias |
@@ -52,14 +52,14 @@ Todas as skills compartilhadas pelo time ficam em [REGISTRY.md](./REGISTRY.md).
 
 ## Convenção de nomes
 
-Toda skill tem prefixo de área:
+Toda skill compartilhada tem prefixo de papel ou de fonte:
 
-- `trafego-*` — gestão de mídia, análise de contas, anomalias
-- `criativo-*` — copy, briefing, design, LPs
-- `cs-*` — check-in, relatório, playbook, transcrição
-- `estrategia-*` — diagnóstico, planejamento, pesquisa
-- `gestao-*` — reuniões, tasks, overview
-- `dados-*` — análise, dashboards, insights
+- `geral-*` — qualquer papel
+- `gt-*` — gestor de trafego
+- `designer-*` — design
+- `copy-*` — copy
+- `account-*` — relacionamento, check-in, pesquisa profunda, handoff
+- `coord-*` — coordenacao
 
 Além das áreas, skills **puxadoras de dados** (libraries de fonte) usam prefixo da integração:
 
@@ -68,7 +68,7 @@ Além das áreas, skills **puxadoras de dados** (libraries de fonte) usam prefix
 - `hubspot-*` · `kommo-*` — CRMs
 - `shopify-*` · `tray-*` — e-commerce
 
-Exemplo: `trafego-analise-anomalias`, `cs-checkin-ppt`, `v4mos-dados-meta-ads`.
+Exemplo: `gt-analise-anomalias`, `account-checkin-roleplay`, `v4mos-dados-meta-ads`.
 
 ## Estrutura do repo
 
@@ -80,13 +80,25 @@ builders-hub/
 ├── CLAUDE.md · AGENTS.md     # instruções pra IA
 ├── .claude/skills/           # skills pro Claude Code
 ├── .agents/skills/           # skills pro Anti-Gravity (espelho)
-├── clientes/                 # seus KBs de clientes (gitignored)
+├── squads/                   # squads e KBs de clientes (gitignored)
 ├── bases/                    # seus KBs de projetos (gitignored)
 ├── docs/                     # guias
-└── scripts/build-registry.sh # regenera REGISTRY.md
+└── scripts/build-registry.py # regenera REGISTRY.md
 ```
 
-**Importante:** `clientes/` e `bases/` são seus — ficam no seu computador, nunca sobem pro repo público (estão no `.gitignore`).
+Clientes vivem em `squads/{squad}/clientes/{cliente}/`. Dentro de cada cliente:
+
+```text
+calls/             # transcripts brutos
+checkins/          # pautas, ensaios, reviews e materiais finais de check-in
+docs/              # briefings, propostas, contratos, apresentacoes
+campanhas/         # dados de campanhas
+mission-control/   # OKRs, apostas vivas, combinados, personas e historicos
+CLAUDE.md/AGENTS.md
+links.md
+```
+
+**Importante:** `squads/` e `bases/` são seus — ficam no seu computador, nunca sobem pro repo público (estão no `.gitignore`, exceto templates).
 
 ## Contribuir
 

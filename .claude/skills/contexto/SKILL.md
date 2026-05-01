@@ -1,14 +1,14 @@
 ---
 name: contexto
-description: Le todos os arquivos em uma KB (cliente, squad ou projeto) e gera CLAUDE.md e AGENTS.md com o contexto completo. Detecta o nivel automaticamente. Use quando o usuario rodar /contexto ou quiser que a IA "conheca" um cliente, squad ou projeto.
+description: Le todos os arquivos em uma KB (cliente, squad ou projeto), gera CLAUDE.md e AGENTS.md, e quando for cliente cria/atualiza mission-control/ com OKRs, apostas vivas, combinados, personas e historico de check-ins. Detecta o nivel automaticamente. Use quando o usuario rodar /contexto, quiser que a IA "conheca" um cliente/squad/projeto, ou quiser criar/atualizar Mission Control de cliente.
 ---
 
-Voce vai analisar uma Knowledge Base e gerar os arquivos `CLAUDE.md` e `AGENTS.md` que funcionem como "memoria" pra qualquer trabalho futuro.
+Voce vai analisar uma Knowledge Base e gerar os arquivos `CLAUDE.md` e `AGENTS.md` que funcionem como "memoria" pra qualquer trabalho futuro. Quando a KB for de CLIENTE, tambem crie/atualize `mission-control/`, que e o estado vivo usado por skills de check-in.
 
 ## Estrutura esperada
 
 - `squads/{squad}/` — pasta de squad (tem `README.md` com membros, `docs/`, e subpasta `clientes/`)
-- `squads/{squad}/clientes/{cliente}/` — pasta de cliente (tem `calls/`, `docs/`, `campanhas/`, `links.md`)
+- `squads/{squad}/clientes/{cliente}/` — pasta de cliente (tem `calls/`, `checkins/`, `docs/`, `campanhas/`, `links.md`, e pode ter `mission-control/`)
 - `bases/{projeto}/` — pasta de projeto/area (tem `docs/`, `dados/`, `referencias/`)
 
 **Padrao obrigatorio:** todo cliente vive em `squads/{squad}/clientes/{cliente}/`. Cliente solto, fora de squad, nao existe.
@@ -19,7 +19,7 @@ Voce vai analisar uma Knowledge Base e gerar os arquivos `CLAUDE.md` e `AGENTS.m
 
 Detecte o que rodar com base na pasta corrente do usuario:
 
-- **Pasta corrente e cliente** (tem `calls/`, `docs/`, `campanhas/` E nao tem subpasta `clientes/`): use ela direto.
+- **Pasta corrente e cliente** (tem `calls/`, `docs/`, `campanhas/`; `checkins/` pode existir ou ser criado; E nao tem subpasta `clientes/`): use ela direto.
 - **Pasta corrente e squad** (tem subpasta `clientes/` E `README.md`): use ela direto.
 - **Pasta corrente e projeto** (`bases/{X}/`): use ela direto.
 - **Caso contrario:** liste todas as KBs disponiveis e pergunte:
@@ -29,7 +29,7 @@ Detecte o que rodar com base na pasta corrente do usuario:
 
 ### Passo 2 — Detectar o tipo
 
-- **CLIENTE** (operacao): tem `calls/`, `docs/`, `campanhas/`
+- **CLIENTE** (operacao): tem `calls/`, `docs/`, `campanhas/`; `checkins/` e recomendado
 - **SQUAD**: tem subpasta `clientes/` e `README.md` com membros
 - **PROJETO/AREA** (generico): tem `docs/`, `dados/`, `referencias/`
 
@@ -37,7 +37,7 @@ Detecte o que rodar com base na pasta corrente do usuario:
 
 Leia TODOS os arquivos da pasta:
 
-- **Cliente**: leia tudo em `calls/`, `docs/`, `campanhas/`, `links.md` e qualquer outro arquivo.
+- **Cliente**: leia tudo em `calls/`, `checkins/`, `docs/`, `campanhas/`, `links.md`, `mission-control/` se existir, e qualquer outro arquivo.
 - **Squad**: leia `README.md` e tudo em `docs/`. NAO leia o conteudo dos clientes filhos — so liste os nomes das pastas.
 - **Projeto**: leia tudo recursivamente.
 
@@ -47,7 +47,7 @@ Leia cada arquivo por completo. Nao pule nada.
 
 **Se for CLIENTE (operacao):**
 
-Extraia: nome da empresa, segmento, produto/servico, publico-alvo, diferenciais, canais, investimento, metricas, contatos, combinados, pendencias, objetivos, teses, historico, proximos passos. Tambem inclua os links uteis encontrados em `links.md`.
+Extraia: nome da empresa, segmento, produto/servico, publico-alvo, diferenciais, canais, investimento, metricas, contatos, combinados, pendencias, objetivos, teses, historico, proximos passos e aprendizados de check-ins. Tambem inclua os links uteis encontrados em `links.md`.
 
 Gere o `CLAUDE.md` e o `AGENTS.md` (mesmo conteudo) com:
 
@@ -92,6 +92,73 @@ Veja `links.md` na raiz desta pasta pra todos os links uteis.
 - Comece lendo `links.md` pra saber dos recursos disponiveis.
 - Se o usuario compartilhar um link util durante a conversa, pergunte se quer adicionar a `links.md`.
 ```
+
+Depois, crie ou atualize `mission-control/` na raiz do cliente com os 5 arquivos abaixo. Se o arquivo ja existir, preserve informacoes historicas e atualize com base no material novo. Nao apague aprendizados antigos sem evidencia clara de que ficaram obsoletos.
+
+Garanta tambem que exista a pasta `checkins/` na raiz do cliente. Ela guarda pautas, ensaios, reviews e relatorios de check-in. Nao coloque transcripts brutos ali; transcripts ficam em `calls/`.
+
+```text
+mission-control/
+|-- okr-quarter.md
+|-- apostas-vivas.md
+|-- combinados.md
+|-- personas-call.md
+`-- historico-checkins.md
+```
+
+**`okr-quarter.md`**
+- Objetivo do quarter atual.
+- KRs mensuraveis.
+- Status atual e mes N de 3.
+- Fonte usada (planejamento pos-kickoff, kickoff, check-in, docs).
+- Se nao houver OKR explicito, escreva `[nao encontrado nos docs disponiveis]` e liste o que o account precisa preencher.
+
+**`apostas-vivas.md`**
+Use a tabela obrigatoria:
+
+```markdown
+| Aposta (o que cremos) | Por que apostamos | Como mata (sinal + prazo) | Plano B se morrer |
+|---|---|---|---|
+```
+
+Registre 3 a 5 apostas estrategicas atuais. Cada aposta precisa ser testavel. Quando inferir criterio de morte ou plano B, marque `[INFERIDO - confirmar com account]`.
+
+**`combinados.md`**
+Separe pendentes, em andamento e feitos. Use o schema:
+
+```markdown
+- [ ] {dono} {acao} ate {prazo}
+- [->] {dono} {acao} (em andamento)
+- [x] {dono} {acao} (feito em {data})
+```
+
+Se nao houver dono ou prazo, marque `[A CONFIRMAR]`.
+
+**`personas-call.md`**
+Para cada stakeholder relevante, registre:
+- Papel na conta.
+- Arquetipo de call (ex: decisor agressivo, operacional cetico, estrategista, passivo).
+- Voz e jeito de falar.
+- Gatilhos.
+- Padroes de provocacao.
+- Como argumenta.
+- Frases tipicas (citacao literal curta ou parafrase fiel).
+
+Se nao houver check-ins salvos, pergunte ao account quais arquetipos parecem mais com os stakeholders e marque como `[declarado pelo account - refinar com proximas calls]`.
+
+**`historico-checkins.md`**
+Liste as calls em ordem cronologica:
+
+```markdown
+## YYYY-MM-DD - {Tipo da call}
+**Modo:** TEM | SEM | ND
+**Resumo (1 linha):** ...
+**Transcript:** [link relativo](../calls/{arquivo}.md)
+**Pontos criticos:**
+- ...
+```
+
+Use `ND` para calls anteriores ao framework ROPRE V2 ou quando o modo nao estiver claro.
 
 **Se for SQUAD:**
 
@@ -168,6 +235,7 @@ Salve e diga:
 ## Regras
 
 - NAO invente informacoes. Se nao encontrou algo, deixe como "[nao disponivel]".
+- Em `mission-control/`, diferencie evidencia direta de inferencia com `[INFERIDO]` ou `[A CONFIRMAR]`.
 - Se a KB estiver vazia ou quase vazia, avise e sugira quais dados adicionar.
 - Priorize fatos sobre interpretacoes.
 - Mantenha os arquivos concisos — maximo 150 linhas.
