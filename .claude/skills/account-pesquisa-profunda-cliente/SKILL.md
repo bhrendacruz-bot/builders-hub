@@ -3,7 +3,7 @@ name: account-pesquisa-profunda-cliente
 description: Pesquisa profunda de cliente para KB acionavel. PREMISSA OBRIGATORIA - dados do cliente ja na pasta (no minimo formulario de kickoff + transcricao de reuniao de vendas). Sem isso a skill nao roda. Usa esses dados pra preencher 4 prompts sequenciais pro Deep Research do Gemini (cliente+digital+regiao; produto+setor; consumidor; concorrencia). Opcional Perplexity. Nao usa Gem nem deep research no agente. Use antes de copy, conteudo, campanha ou LP.
 area: account
 author: guilhermelippert
-version: 1.4.0
+version: 1.5.0
 ---
 
 ## REGRA CRITICA — paths absolutos sempre
@@ -142,11 +142,20 @@ Le tudo que achou na varredura e produz um bloco de **resumo fiel** com:
 
 Se o cliente afirmou algo critico mas duvidoso na call, marque **VALIDAR**. Se uma area ficou vazia mesmo com kickoff+vendas, marque **LACUNA** — entra como pergunta pro DR.
 
-## Passo 4 — Instrucao fixa ao usuario
+## Passo 4 — Entregar os prompts AO USUARIO (no chat E em arquivo)
 
-Envie algo neste spirit:
+**REGRA:** os 4 prompts do Gemini + o prompt do Perplexity tem que aparecer **direto na conversa**, dentro de blocos `code` copiaveis, com o `<<<DADOS INTERNOS CONSOLIDADOS>>>` ja substituido pelo bloco real do Passo 3. Salvar nos arquivos NAO basta — o usuario precisa copiar e colar no Gemini sem abrir nada.
 
-> Rode **quatro Deep Researches no Gemini**, **um de cada vez**. Em cada rodada depois da primeira, **anexe ou cole o relatorio anterior** no contexto do Deep Research junto com o novo prompt. Salve cada saida em `bruto/gemini/dr-0N-output.md`. Opcional: no fim, rode o `prompt-perplexity-social-opcional.md` no Perplexity.
+**Como entregar:**
+
+1. Imprime os 5 prompts no chat, um abaixo do outro, cada um num bloco \`\`\`text fechado, na ordem DR-1 → DR-2 → DR-3 → DR-4 → Perplexity.
+2. Antes de cada bloco, uma linha curta dizendo o que e e onde salvar o output bruto (ex: "**DR-1 — cole no Gemini Deep Research, salve a saida em `bruto/gemini/dr-01-output.md`**").
+3. Em paralelo, salva o mesmo conteudo nos arquivos `prompts/dr-N-*.md` e `prompt-perplexity-social-opcional.md` (com path absoluto).
+4. Fecha com a instrucao operacional:
+
+> Rode **quatro Deep Researches no Gemini**, **um de cada vez**, na ordem acima. Em cada rodada apos a primeira, **anexe ou cole o relatorio da rodada anterior** no contexto do Deep Research junto com o novo prompt. Salve cada saida em `bruto/gemini/dr-0N-output.md`. Opcional no fim: rode o prompt do Perplexity.
+
+**Nao resumir os prompts no chat.** O bloco copiavel e o entregavel — se voce truncar, o usuario tem que abrir arquivo, e o ponto da skill e zero atrito.
 
 ## Templates dos 4 prompts (entregar SEMPRE preenchidos com `[DADOS INTERNOS CONSOLIDADOS]`)
 
@@ -279,12 +288,12 @@ Preencha `07-fontes-e-evidencias.md` com links, data, ferramenta, fato vs infere
 
 ## Fechamento
 
-Entregue ao usuario:
+Entregue ao usuario, **na conversa**, nesta ordem:
 
-1. `00-briefing-pesquisa.md` atualizado com o `[DADOS INTERNOS CONSOLIDADOS]`.
-2. Os quatro arquivos em `prompts/` **preenchidos** com os dados internos reais (ou os quatro blocos no chat).
-3. `prompt-perplexity-social-opcional.md` preenchido.
-4. Onde salvar cada output bruto.
+1. **Os 5 prompts em blocos `code` copiaveis** (DR-1, DR-2, DR-3, DR-4, Perplexity), preenchidos com os dados internos reais — ver Passo 4. Isso e obrigatorio: o usuario precisa colar no Gemini sem abrir arquivo.
+2. Link pro `00-briefing-pesquisa.md` atualizado com o `[DADOS INTERNOS CONSOLIDADOS]`.
+3. Link pros 4 arquivos em `prompts/` e pro `prompt-perplexity-social-opcional.md` salvos.
+4. Onde salvar cada output bruto (`bruto/gemini/dr-0N-output.md`, `bruto/perplexity/`).
 5. Lacunas criticas pro cliente validar.
 
 Nao entregue plano de campanha final aqui — isso vem depois da KB consolidada.
