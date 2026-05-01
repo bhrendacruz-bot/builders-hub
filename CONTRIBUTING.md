@@ -13,7 +13,7 @@ No terminal, rode:
 A skill faz tudo:
 
 1. Te pergunta qual skill quer compartilhar
-2. Valida o nome (`{area}-{slug}`) e o frontmatter (`name`, `description`, `area`, `author`, `version`)
+2. Valida o nome (`{papel}-{slug}` ou `{fonte}-{slug}`) e o frontmatter (`name`, `description`, `area`, `author`, `version`)
 3. Remove qualquer info pessoal/credencial do conteudo
 4. Cria uma branch, commita a skill em `.claude/skills/` E `.agents/skills/`
 5. Faz push e abre um Pull Request automatico com o template preenchido
@@ -26,7 +26,7 @@ O curador revisa, aprova, e em poucos dias sua skill entra no hub. Todo mundo qu
 Se voce manja de git, tambem pode:
 
 1. Fork do repo
-2. Branch nova: `skill/{area}-{nome}`
+2. Branch nova: `skill/{papel}-{nome}` (ou `skill/{fonte}-{nome}`)
 3. Copie sua skill pra `.claude/skills/{prefixo}-{nome}/SKILL.md` E `.agents/skills/{prefixo}-{nome}/SKILL.md`
 4. Commit + push
 5. Abra PR preenchendo o template
@@ -35,17 +35,18 @@ Se voce manja de git, tambem pode:
 
 ### Naming
 - **Prefixo obrigatorio** no nome — pode ser:
-  - **Area** (trabalho/output): `trafego`, `criativo`, `cs`, `estrategia`, `gestao`, `dados`, `outra`
-  - **Fonte** (puxador de dados): `v4mos`, `google`, `ga4`, `meta`, `hubspot`, `kommo`, `shopify`, `tray`
-- Slug em kebab-case: `trafego-analise-anomalias`, `v4mos-dados-meta-ads`
+  - **Papel** (skills agrupadas por quem usa): `geral`, `gt`, `designer`, `copy`, `account`, `coord`
+  - **Fonte** (puxador de dados, reutilizavel): `v4mos`, `google`, `ga4`, `meta`, `hubspot`, `kommo`, `shopify`, `tray`
+- Slug em kebab-case: `gt-analise-anomalias`, `v4mos-dados-meta-ads`
 - Nome dentro do frontmatter bate com o nome da pasta
+- Pra `/gt`, `/designer` etc. filtrarem so as skills do papel no autocomplete do Claude Code, o prefixo precisa estar no nome (nao basta no frontmatter)
 
 ### Frontmatter obrigatorio
 ```yaml
 ---
-name: trafego-analise-anomalias
+name: gt-analise-anomalias
 description: O que a skill faz em uma frase. Triggera quando [cenarios].
-area: trafego       # area OU fonte (bate com o prefixo do nome)
+area: gt            # papel OU fonte (bate com o prefixo do nome). Campo se chama `area:` por compat historica.
 author: seu-github-username
 version: 1.0.0
 ---

@@ -1,5 +1,5 @@
 ---
-name: brainstormar-sobre-minha-funcao
+name: geral-brainstormar-sobre-minha-funcao
 description: Entrevista o usuario sobre seu trabalho para descobrir como usar IA no dia a dia dele. Configura agenda, analisa tarefas e sugere skills. Atualiza o CLAUDE.md raiz com o perfil do usuario. Use quando rodar /brainstormar-sobre-minha-funcao ou quando o usuario quiser descobrir como a IA pode ajudar ele.
 ---
 

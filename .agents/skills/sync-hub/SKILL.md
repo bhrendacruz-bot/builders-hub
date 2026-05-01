@@ -37,7 +37,7 @@ git status --porcelain
   ```
   Lembre-se dessa stash pra restaurar no fim.
 
-- Se o usuario esta em uma branch que NAO e main (ex: `skill/trafego-x` de um PR em aberto), **nao force ele pra main**. Sync funciona assim:
+- Se o usuario esta em uma branch que NAO e main (ex: `skill/gt-x` de um PR em aberto), **nao force ele pra main**. Sync funciona assim:
   1. Salva a branch atual (`ORIG_BRANCH=$CURRENT_BRANCH`)
   2. Vai pra main, sincroniza
   3. Volta pra branch original
@@ -86,12 +86,12 @@ Agrupe por skill (pegue o diretorio pai dentro de `.claude/skills/`) e monte um 
 
 ```
 ✨ 3 skills novas desde sua ultima sync:
-  • trafego-analise-anomalias (por @deborah, v1.0.0)
-  • criativo-briefing-corretor (por @fernanda, v1.0.0)
-  • cs-checkin-ppt (por @joao, v1.2.0)
+  • gt-analise-anomalias (por @deborah, v1.0.0)
+  • designer-briefing-corretor (por @fernanda, v1.0.0)
+  • account-checkin-ppt (por @joao, v1.2.0)
 
 🔄 1 skill atualizada:
-  • trafego-diagnostico-diario (por @guilherme, v1.0.0 → v1.1.0)
+  • gt-diagnostico-diario (por @guilherme, v1.0.0 → v1.1.0)
 ```
 
 Se for a primeira sync (sem `.sync-hub-last`), mostre a contagem total de skills no hub em vez de diff.
@@ -142,7 +142,7 @@ git checkout "$ORIG_BRANCH"
 ```
 
 Pergunte se quer rebase:
-> "Voce estava na branch `skill/trafego-x`. Quer que eu rebase ela em cima da main nova? Isso garante que seu PR nao vai dar conflito. (Recomendado: sim)"
+> "Voce estava na branch `skill/gt-x`. Quer que eu rebase ela em cima da main nova? Isso garante que seu PR nao vai dar conflito. (Recomendado: sim)"
 
 Se sim: `git rebase main` (e se der conflito, pare e guie).
 

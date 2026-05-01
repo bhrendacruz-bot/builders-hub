@@ -30,14 +30,14 @@ Se ele nao souber o nome exato, liste as skills locais que NAO sao skills de bas
 ls .claude/skills/
 ```
 
-Filtre as skills de base (onboarding, contexto, criador-de-skills, novo-cliente, novo-projeto, brainstormar-sobre-minha-funcao, sabatina, compartilhar-skill, sync-hub, frontend-design). Apresente so as que tem prefixo de area (`trafego-*`, `criativo-*`, etc.) ou que parecem ser de contribuicao.
+Filtre as skills de base (onboarding, contexto, criador-de-skills, novo-cliente, novo-projeto, compartilhar-skill, sync-hub). Apresente so as que tem prefixo de papel (`geral-*`, `gt-*`, `designer-*`, `copy-*`, `account-*`, `coord-*`) ou de fonte (`v4mos-*`, `meta-*`, `ga4-*`, etc.) — sao essas que sao de contribuicao.
 
 ### Passo 2 — Validar naming
 
-A skill DEVE seguir o padrao `{area}-{slug}`:
+A skill DEVE seguir o padrao `{papel}-{slug}` ou `{fonte}-{slug}`:
 
 ```
-^(trafego|criativo|cs|estrategia|gestao|dados|outra|v4mos|google|ga4|meta|hubspot|kommo|shopify|tray)-[a-z0-9-]+$
+^(geral|gt|designer|copy|account|coord|v4mos|google|ga4|meta|hubspot|kommo|shopify|tray)-[a-z0-9-]+$
 ```
 
 Se o nome nao bater, pare e oriente o usuario:

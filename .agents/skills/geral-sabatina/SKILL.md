@@ -1,5 +1,5 @@
 ---
-name: sabatina
+name: geral-sabatina
 description: Entrevista o usuario de forma implacavel sobre cada aspecto de um plano ou design ate atingir entendimento compartilhado. Percorre cada ramo da arvore de decisao, resolvendo dependencias uma a uma. Use quando o usuario quiser testar um plano, ser questionado sobre uma ideia, ou mencionar "sabatina".
 user-invocable: true
 ---

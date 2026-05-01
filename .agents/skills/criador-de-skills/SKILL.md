@@ -1,13 +1,13 @@
 ---
 name: criador-de-skills
-description: Cria skills novas e melhora skills existentes no Builders Hub. Use quando o usuario quiser criar uma skill do zero, transformar um workflow que funcionou em skill reutilizavel, editar uma skill existente, ou rodar avaliacoes. Forca prefixo de area OU prefixo de fonte ({prefixo}-{nome}) e escreve a skill em .claude/skills/ E .agents/skills/ ao mesmo tempo.
+description: Cria skills novas e melhora skills existentes no Builders Hub. Use quando o usuario quiser criar uma skill do zero, transformar um workflow que funcionou em skill reutilizavel, editar uma skill existente, ou rodar avaliacoes. Forca prefixo de papel OU prefixo de fonte ({prefixo}-{nome}) e escreve a skill em .claude/skills/ E .agents/skills/ ao mesmo tempo.
 ---
 
 # Skill Creator — Builders Hub
 
 Cria skills novas e itera pra deixar elas melhores. No contexto do **Builders Hub**, toda skill criada por essa criador-de-skills segue dois padroes rigidos que a gente valida antes de escrever qualquer arquivo:
 
-1. **Prefixo obrigatorio** no nome (`{prefixo}-{slug}`) — pode ser prefixo de AREA (trabalho/output) ou de FONTE (puxador de dados)
+1. **Prefixo obrigatorio** no nome (`{prefixo}-{slug}`) — pode ser prefixo de PAPEL (quem usa a skill) ou de FONTE (puxador de dados)
 2. **Duplo-write**: a skill e escrita em `.claude/skills/{nome}/SKILL.md` **E** em `.agents/skills/{nome}/SKILL.md` com conteudo identico, pra funcionar tanto no Claude Code quanto no Anti-Gravity.
 
 Se o usuario quer rodar benchmarks, evals quantitativos, otimizacao de descricao e packaging, tudo isso continua disponivel nas secoes avancadas mais abaixo — mas a maioria dos V4ers so precisa do fluxo simples que tem nessa primeira parte.
@@ -21,17 +21,18 @@ Se o usuario quer rodar benchmarks, evals quantitativos, otimizacao de descricao
 Antes de escrever qualquer linha, pergunte ao usuario:
 
 **1a. Que tipo de skill e essa?**
-- **Workflow (output final)** — entrega trabalho acabado: relatorio, analise, check-in, PPT, briefing corrigido, etc. Vai pro prefixo de **AREA**.
+- **Workflow (output final)** — entrega trabalho acabado: relatorio, analise, check-in, PPT, briefing corrigido, etc. Vai pro prefixo de **PAPEL** (agrupa por quem usa).
 - **Puxador de dados (library)** — so busca dados de uma fonte externa (API, banco, planilha) e devolve em formato utilizavel. Outras skills podem consumir essa. Vai pro prefixo de **FONTE**.
 
-**1b. Se WORKFLOW → escolha a area:**
-- `trafego` — gestao de midia, analise de contas, anomalias
-- `criativo` — copy, briefing, design, LPs
-- `cs` — check-in, relatorio, playbook, transcricao
-- `estrategia` — diagnostico, planejamento, pesquisa
-- `gestao` — reunioes, tasks, overview, processos
-- `dados` — analise, dashboards, insights, BI
-- `outra` — se nao encaixa em nenhuma (fica numa secao propria no REGISTRY.md)
+**1b. Se WORKFLOW → escolha o papel (quem usa essa skill no dia a dia):**
+- `geral` — qualquer papel pode usar (sabatina, frontend-design, brainstorm, etc.)
+- `gt` — gestor de trafego: gestao de midia, analise de contas, anomalias, otimizacao de campanha
+- `designer` — designer: criacao visual, layouts, identidade, mockups
+- `copy` — copywriter: copy de anuncio, briefing de texto, conteudo, scripts
+- `account` — account: relacionamento com cliente, check-in, pesquisa profunda, playbook
+- `coord` — coordenador: gestao de equipe, processos, reunioes, overview de contas
+
+> Dica: ao terminar, o usuario vai poder digitar `/gt`, `/designer`, etc. no Claude Code e o autocomplete filtra so as skills daquele papel. Por isso o prefixo importa.
 
 **1b. Se PUXADOR → escolha a fonte:**
 - `v4mos` — V4mos / V4mkt (Meta Ads, Google Ads, CRM agregados)
@@ -48,12 +49,13 @@ Se a fonte nao estiver na lista, pare e oriente: "Pra adicionar uma fonte nova, 
 **1c. Nome curto** em kebab-case (minusculas, hifens, sem acentos). Ex: `analise-anomalias`, `dados-meta-ads`, `checkin-ppt`.
 
 **1d. Montar o nome final** = `{prefixo}-{slug}`. Exemplos:
-- Workflow area trafego + slug `analise-anomalias` → `trafego-analise-anomalias`
+- Workflow papel gt + slug `analise-anomalias` → `gt-analise-anomalias`
+- Workflow papel account + slug `pesquisa-profunda-cliente` → `account-pesquisa-profunda-cliente`
 - Puxador fonte v4mos + slug `dados-meta-ads` → `v4mos-dados-meta-ads`
 
 **1e. Validar com regex:**
 ```
-^(trafego|criativo|cs|estrategia|gestao|dados|outra|v4mos|google|ga4|meta|hubspot|kommo|shopify|tray)-[a-z0-9-]+$
+^(geral|gt|designer|copy|account|coord|v4mos|google|ga4|meta|hubspot|kommo|shopify|tray)-[a-z0-9-]+$
 ```
 Se nao passar, explique o que esta errado e pergunte de novo.
 
@@ -70,9 +72,9 @@ O frontmatter da skill V4 tem **5 campos obrigatorios**:
 
 ```yaml
 ---
-name: {area}-{slug}
+name: {prefixo}-{slug}
 description: O que a skill faz em uma frase. Use quando [cenarios especificos de trigger].
-area: {area}
+area: {prefixo}
 author: {github-username-do-usuario}
 version: 1.0.0
 ---
@@ -80,7 +82,7 @@ version: 1.0.0
 
 - `name` deve bater EXATAMENTE com o nome da pasta
 - `description` precisa ser "pushy" sobre quando triggerar (veja secao avancada)
-- `area` aceita: as 7 areas (trafego/criativo/cs/estrategia/gestao/dados/outra) ou uma das fontes (v4mos/google/ga4/meta/hubspot/kommo/shopify/tray). Bate com o prefixo do nome.
+- `area` aceita: um dos 6 papeis (geral/gt/designer/copy/account/coord) ou uma das fontes (v4mos/google/ga4/meta/hubspot/kommo/shopify/tray). Bate com o prefixo do nome. (O campo se chama `area:` por compat historica — hoje carrega o papel.)
 - `author` pegue do git (`git config user.name`) ou pergunte ao usuario qual o github-handle dele
 - `version` comeca em `1.0.0`
 

@@ -70,4 +70,4 @@ clientes/[nome-formatado]/
 ```
 
 Diga:
-> "Cliente criado. Jogue os dados dele nas pastas (calls, docs, campanhas) e rode `/contexto` quando tiver pronto. O `.env` ta vazio — preenche as credenciais V4mos conforme for precisar (skills tipo `/trafego-meta-diagnostico` vao pedir o que falta)."
+> "Cliente criado. Jogue os dados dele nas pastas (calls, docs, campanhas) e rode `/contexto` quando tiver pronto. O `.env` ta vazio — preenche as credenciais V4mos conforme for precisar (skills tipo `/gt-meta-diagnostico` vao pedir o que falta)."

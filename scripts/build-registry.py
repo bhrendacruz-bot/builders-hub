@@ -2,7 +2,7 @@
 """
 build-registry.py
 Regenera REGISTRY.md a partir dos frontmatters das skills em .claude/skills/.
-Agrupa por area, usa `area:` do frontmatter; se ausente, deriva do prefixo do nome da pasta.
+Agrupa por funcao/papel, usa `area:` do frontmatter (mantido por compat); se ausente, deriva do prefixo do nome da pasta.
 
 Uso: python3 scripts/build-registry.py
 Tambem rodado pela GitHub Action em toda merge na main.
@@ -18,20 +18,19 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
 OUTPUT = REPO_ROOT / "REGISTRY.md"
 
-# Prefixos de AREA (skills que entregam trabalho final)
-AREAS = ["trafego", "criativo", "cs", "estrategia", "gestao", "dados", "outra"]
+# Prefixos de FUNCAO/PAPEL (skills que entregam trabalho final, agrupadas por quem usa)
+FUNCTIONS = ["geral", "gt", "designer", "copy", "account", "coord"]
 
 # Prefixos de FONTE (skills que puxam/expoem dados de uma integracao)
 SOURCES = ["v4mos", "google", "ga4", "meta", "hubspot", "kommo", "shopify", "tray"]
 
-AREA_LABEL = {
-    "trafego": "🎯 Tráfego",
-    "criativo": "🎨 Criativo",
-    "cs": "🤝 Customer Success",
-    "estrategia": "🧭 Estratégia",
-    "gestao": "📋 Gestão",
-    "dados": "📊 Dados",
-    "outra": "🧩 Outras",
+FUNCTION_LABEL = {
+    "geral": "🌐 Geral",
+    "gt": "🎯 Gestao de Trafego",
+    "designer": "🎨 Designer",
+    "copy": "✍️ Copy",
+    "account": "🤝 Account",
+    "coord": "📋 Coordenacao",
     "_base": "🛠 Base (setup/fluxo)",
 }
 
@@ -46,18 +45,18 @@ SOURCE_LABEL = {
     "tray": "🔌 Tray",
 }
 
-# Skills de base/fluxo — sem prefixo, ficam numa secao propria
+# Skills de base/fluxo — sem prefixo, ficam numa secao propria.
+# Sao a "mecanica do hub" (setup, novo cliente, criar/compartilhar skill, sync).
+# Skills de trabalho universal (sabatina, frontend-design, brainstormar-sobre-minha-funcao)
+# vao com prefixo `geral-*` em vez de aqui.
 BASE_SKILLS = {
     "onboarding",
     "contexto",
     "criador-de-skills",
     "novo-cliente",
     "novo-projeto",
-    "brainstormar-sobre-minha-funcao",
-    "sabatina",
     "compartilhar-skill",
     "sync-hub",
-    "frontend-design",
 }
 
 
@@ -92,18 +91,19 @@ def truncate(s: str, n: int = 110) -> str:
 
 
 def classify(name: str, fm: dict[str, str]) -> tuple[str, str]:
-    """Retorna (family, key) onde family e 'base' | 'area' | 'source'.
-    key e '_base', o prefixo de area, ou o prefixo de fonte.
+    """Retorna (family, key) onde family e 'base' | 'function' | 'source'.
+    key e '_base', o prefixo de funcao/papel, ou o prefixo de fonte.
     """
     if name in BASE_SKILLS:
         return "base", "_base"
     prefix = name.split("-", 1)[0]
     if prefix in SOURCES:
         return "source", prefix
-    area = fm.get("area") or prefix
-    if area not in AREAS:
-        area = "outra"
-    return "area", area
+    # campo `area:` no frontmatter agora carrega o papel (nome do campo mantido por compat)
+    function = fm.get("area") or prefix
+    if function not in FUNCTIONS:
+        function = "geral"
+    return "function", function
 
 
 def main() -> int:
@@ -129,10 +129,10 @@ def main() -> int:
     total = len(skills)
     today = datetime.date.today().isoformat()
 
-    # Conta por chave (area ou source)
+    # Conta por chave (funcao ou source)
     counts: dict[str, int] = {"_base": 0}
-    for a in AREAS:
-        counts[a] = 0
+    for fn in FUNCTIONS:
+        counts[fn] = 0
     for s in SOURCES:
         counts[s] = 0
     for _, _, _, key in skills:
@@ -150,12 +150,12 @@ def main() -> int:
     lines.append("")
     lines.append("## Índice")
     lines.append("")
-    lines.append(f"- [{AREA_LABEL['_base']}](#base) ({counts['_base']})")
-    for a in AREAS:
-        c = counts.get(a, 0)
+    lines.append(f"- [{FUNCTION_LABEL['_base']}](#base) ({counts['_base']})")
+    for fn in FUNCTIONS:
+        c = counts.get(fn, 0)
         if c == 0:
             continue
-        lines.append(f"- [{AREA_LABEL[a]}](#{a}) ({c})")
+        lines.append(f"- [{FUNCTION_LABEL[fn]}](#{fn}) ({c})")
     # Seção de fontes (se alguma tem skills)
     source_total = sum(counts.get(s, 0) for s in SOURCES)
     if source_total:
@@ -189,12 +189,12 @@ def main() -> int:
         lines.append("")
 
     # Renderiza base primeiro
-    render_section(AREA_LABEL["_base"], "base", lambda f, k: f == "base")
-    # Áreas
-    for a in AREAS:
-        if counts.get(a, 0) == 0:
+    render_section(FUNCTION_LABEL["_base"], "base", lambda f, k: f == "base")
+    # Funcoes/papeis
+    for fn in FUNCTIONS:
+        if counts.get(fn, 0) == 0:
             continue
-        render_section(AREA_LABEL[a], a, lambda f, k, _a=a: f == "area" and k == _a)
+        render_section(FUNCTION_LABEL[fn], fn, lambda f, k, _fn=fn: f == "function" and k == _fn)
     # Integrações / Fontes (se tem qualquer uma)
     if source_total:
         lines.append("## 🔌 Integrações / Fontes")
