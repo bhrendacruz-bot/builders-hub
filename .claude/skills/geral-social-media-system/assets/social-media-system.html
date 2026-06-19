@@ -328,12 +328,97 @@
             margin-bottom: 30px;
         }
 
+        /* PIPELINE */
+        .pipeline-section { margin-bottom: 30px; }
+
+        .deadline-banner {
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .deadline-info { display: flex; flex-direction: column; gap: 4px; }
+        .deadline-title { font-size: 18px; font-weight: 700; }
+        .deadline-sub { font-size: 13px; color: var(--text-secondary); }
+
+        .deadline-countdown {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .deadline-ok { background: rgba(46, 204, 113, 0.15); color: var(--success); }
+        .deadline-warn { background: rgba(243, 156, 18, 0.15); color: var(--warning); }
+        .deadline-late { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+
+        .pipeline-card {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .pipeline-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 15px; }
+        .pipeline-items { display: flex; flex-direction: column; gap: 10px; }
+
+        .pipeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--primary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .pipeline-item:hover { border-color: var(--accent); }
+        .pipeline-item-label { font-size: 13px; font-weight: 600; }
+
+        .pipeline-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .pipeline-status.done { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+        .pipeline-status.pending { background: rgba(243, 156, 18, 0.2); color: var(--warning); }
+        .pipeline-status.late { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+
+        .pipeline-progress {
+            margin-top: 12px;
+            background: var(--primary);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .pipeline-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
             .form-row { grid-template-columns: 1fr; }
             .tab-navigation { gap: 10px; overflow-x: auto; }
             header h1 { font-size: 18px; }
+            .deadline-banner { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -369,6 +454,13 @@
                     <div class="stat-value" id="totalResults">0</div>
                     <div class="stat-label">Resultados Registrados</div>
                 </div>
+            </div>
+
+            <div class="form-section pipeline-section">
+                <h2>🚀 Pipeline de Produção — Deadline Mensal</h2>
+                <div class="deadline-banner" id="deadlineBanner"></div>
+                <div id="pipelineGrid" class="grid"></div>
+                <div id="pipelineEmpty"></div>
             </div>
 
             <div class="form-section">
@@ -603,15 +695,17 @@
 
     <script>
         // DADOS (persistência via localStorage)
-        let clients = JSON.parse(localStorage.getItem('v4sm_clients')) || [];
-        let briefs  = JSON.parse(localStorage.getItem('v4sm_briefs'))  || [];
-        let results = JSON.parse(localStorage.getItem('v4sm_results')) || [];
+        let clients  = JSON.parse(localStorage.getItem('v4sm_clients'))  || [];
+        let briefs   = JSON.parse(localStorage.getItem('v4sm_briefs'))   || [];
+        let results  = JSON.parse(localStorage.getItem('v4sm_results'))  || [];
+        let pipeline = JSON.parse(localStorage.getItem('v4sm_pipeline')) || {};
 
         // INIT
         document.addEventListener('DOMContentLoaded', () => {
             setupTabs();
             setupFrameworkSelect();
             updateDashboard();
+            updatePipeline();
             populateClientSelects();
             displayResults();
             document.getElementById('resultDate').valueAsDate = new Date();
@@ -658,6 +752,7 @@
             document.getElementById('clientSegment').value = '';
 
             updateDashboard();
+            updatePipeline();
             populateClientSelects();
             showToast('Cliente adicionado!');
         }
@@ -667,6 +762,7 @@
             clients = clients.filter(c => c.id !== id);
             localStorage.setItem('v4sm_clients', JSON.stringify(clients));
             updateDashboard();
+            updatePipeline();
             populateClientSelects();
             showToast('Cliente removido');
         }
@@ -918,6 +1014,100 @@ ${variations.map(v => `\n${v.label}\n${v.text}`).join('\n\n───────
             displayResults();
             updateDashboard();
             showToast('Resultado removido');
+        }
+
+        // ─── PIPELINE DE PRODUÇÃO ────────────────────────────────────────────────────
+
+        const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const MONTH_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+        function getDeadlineInfo() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const deadline = new Date(year, month, 15, 23, 59, 59);
+            const targetMonth = (month + 1) % 12;
+            const targetYear = month === 11 ? year + 1 : year;
+            const diffMs = deadline.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            const cycleKey = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}`;
+            return { deadline, deadlineStr: `15/${MONTH_SHORT[month]}`, targetMonthName: MONTH_NAMES[targetMonth], targetYear, diffDays, isLate: diffDays < 0, cycleKey };
+        }
+
+        function getPipelineEntry(clientId, cycleKey) {
+            const key = `${clientId}_${cycleKey}`;
+            if (!pipeline[key]) pipeline[key] = { prePauta: false, pauta: false, criativos: false };
+            return pipeline[key];
+        }
+
+        function togglePipelineStatus(clientId, field) {
+            const info = getDeadlineInfo();
+            const key = `${clientId}_${info.cycleKey}`;
+            if (!pipeline[key]) pipeline[key] = { prePauta: false, pauta: false, criativos: false };
+            pipeline[key][field] = !pipeline[key][field];
+            localStorage.setItem('v4sm_pipeline', JSON.stringify(pipeline));
+            updatePipeline();
+        }
+
+        function updatePipeline() {
+            const info = getDeadlineInfo();
+            const banner = document.getElementById('deadlineBanner');
+
+            let countdownClass, countdownText;
+            if (info.diffDays > 5) { countdownClass = 'deadline-ok'; countdownText = `${info.diffDays} dias`; }
+            else if (info.diffDays > 0) { countdownClass = 'deadline-warn'; countdownText = `${info.diffDays} dias`; }
+            else if (info.diffDays === 0) { countdownClass = 'deadline-warn'; countdownText = 'HOJE'; }
+            else { countdownClass = 'deadline-late'; countdownText = `${Math.abs(info.diffDays)}d atrasado`; }
+
+            banner.innerHTML = `
+                <div class="deadline-info">
+                    <div class="deadline-title">📅 Deadline: ${info.deadlineStr} — Conteúdo de ${info.targetMonthName.toUpperCase()} ${info.targetYear}</div>
+                    <div class="deadline-sub">Pré-pauta, Pauta e Criativos devem estar prontos até o dia 15</div>
+                </div>
+                <div class="deadline-countdown ${countdownClass}">${countdownText}</div>
+            `;
+
+            const grid = document.getElementById('pipelineGrid');
+            const empty = document.getElementById('pipelineEmpty');
+            grid.innerHTML = '';
+
+            if (clients.length === 0) {
+                empty.innerHTML = '<div class="empty-state"><p style="color:var(--text-secondary)">Cadastre clientes para acompanhar o pipeline</p></div>';
+                return;
+            }
+            empty.innerHTML = '';
+
+            clients.forEach(c => {
+                const entry = getPipelineEntry(c.id, info.cycleKey);
+                const done = [entry.prePauta, entry.pauta, entry.criativos].filter(Boolean).length;
+                const pct = Math.round((done / 3) * 100);
+                const barColor = pct === 100 ? 'var(--success)' : info.isLate ? '#e74c3c' : 'var(--accent)';
+
+                const makeItem = (isDone, field, label) => {
+                    const cls = isDone ? 'done' : (info.isLate ? 'late' : 'pending');
+                    const txt = isDone ? '✓ Pronto' : (info.isLate ? '✗ Atrasado' : '○ Pendente');
+                    return `<div class="pipeline-item" onclick="togglePipelineStatus(${c.id},'${field}')">
+                        <span class="pipeline-item-label">${label}</span>
+                        <span class="pipeline-status ${cls}">${txt}</span>
+                    </div>`;
+                };
+
+                const card = document.createElement('div');
+                card.className = 'pipeline-card';
+                card.innerHTML = `
+                    <h4>${c.name} <span style="font-size:12px;color:var(--text-secondary);font-weight:400;">— ${info.targetMonthName}</span></h4>
+                    <div class="pipeline-items">
+                        ${makeItem(entry.prePauta, 'prePauta', 'Pré-pauta')}
+                        ${makeItem(entry.pauta, 'pauta', 'Pauta')}
+                        ${makeItem(entry.criativos, 'criativos', 'Criativos')}
+                    </div>
+                    <div class="pipeline-progress">
+                        <div class="pipeline-progress-bar" style="width:${pct}%;background:${barColor};"></div>
+                    </div>
+                    <div style="text-align:right;margin-top:8px;font-size:12px;color:var(--text-secondary);">${done}/3 concluídos</div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
         // ─── UTILS ──────────────────────────────────────────────────────────────────
